@@ -4,15 +4,13 @@ import 'package:flutter/material.dart';
 
 import 'package:chello/model.dart';
 import 'package:chello/board.dart';
-import 'package:chello/dialog.dart';
 
 
 class ChelloList extends StatelessWidget {
 
-  final int boardIndex;
   final TaskList taskList;
 
-  ChelloList(this.boardIndex, this.taskList);
+  ChelloList({Key key,this.taskList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,33 +21,37 @@ class ChelloList extends StatelessWidget {
       child: new Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new ChelloListTitle(taskList.name),
-          new ChelloCardList(boardIndex, taskList),
-          new AddCardButton(),
+          new ChelloListTitle(title: taskList.name),
+          new Expanded(child: new CardListView(_index, taskList)),
+          new AddCardButton(boardIndex: _index),
         ],
       ),
     );
   }
+
+  int get _index => (key as ValueKey<int>).value;
 }
 
-class ChelloCardList extends StatelessWidget {
+class CardListView extends StatelessWidget {
 
   final int boardIndex;
   final TaskList taskList;
 
-  ChelloCardList(this.boardIndex, this.taskList);
+  CardListView(this.boardIndex, this.taskList);
 
   @override
   Widget build(BuildContext context) {
 
     /* Interleave Chellocards with dragtargets */
     List<Widget> children = new List<Widget>();
+
     int i = 0;
-    for (Task task in taskList.tasks) {
-      children.add(CardListDragTarget(boardIndex, i++));
-      children.add(ChelloCard(boardIndex, task));
+    for (;i < taskList.tasks.length; i++) {
+      TaskIndex location = new TaskIndex(boardIndex, i);
+      children.add(CardListDragTarget(location));
+      children.add(ChelloCard(location));
     }
-    children.add(CardListDragTarget(boardIndex, i++));
+    children.add(CardListDragTarget(new TaskIndex(boardIndex, i++)));
 
     return new Container(
       margin: EdgeInsets.all(10.0),
@@ -64,27 +66,19 @@ class ChelloCardList extends StatelessWidget {
 
 class CardListDragTarget extends StatelessWidget {
 
-  final int boardIndex;
-  final int listIndex;
+  final TaskIndex location;
 
-  CardListDragTarget(this.boardIndex, this.listIndex);
+  CardListDragTarget(this.location);
 
   @override
   Widget build(BuildContext context) {
     return new DragTarget<DraggableCard>(
       builder: (BuildContext context, List<DraggableCard> candidateData, List rejectedData) {
-
-        TaskList taskList = BoardView.of(context).board.getList(boardIndex);
         if (candidateData.isEmpty) {
-          // dragged FROM this list
-
           return new Container(
               padding: EdgeInsets.all(3.0)
           );
-        } else if (!taskList.contains(candidateData.first.task)) {
-
-          // if task is from different cardlist
-          print('target $listIndex');
+        } else {
           return new Container(
             padding: EdgeInsets.all(15.0),
             color: Colors.deepOrange,
@@ -92,15 +86,13 @@ class CardListDragTarget extends StatelessWidget {
         }
       },
       onWillAccept: (DraggableCard draggedTask) {
-        /* Only accept if task came from different cardList */
-        TaskList taskList = BoardView.of(context).board.getList(boardIndex);
+        /* Accept task if it came from different cardList */
+        TaskList taskList = BoardView.of(context).board.getList(location.boardIndex);
         return !taskList.contains(draggedTask.task);
       },
       onAccept: (DraggableCard draggedTask) {
         int fromListIndex = draggedTask.fromListIndex;
-        print('accept from $fromListIndex to $boardIndex');
-        print(draggedTask.task.name);
-        BoardView.of(context).moveTask(draggedTask.task, fromListIndex, boardIndex, listIndex);
+        BoardView.of(context).moveTask(draggedTask.task, fromListIndex, location.boardIndex, location.listIndex);
       },
     );
   }
@@ -108,18 +100,17 @@ class CardListDragTarget extends StatelessWidget {
 
 class ChelloCard extends StatelessWidget {
 
-  final int boardIndex;
-  final Task task;
+  final TaskIndex location;
 
-  ChelloCard(this.boardIndex, this.task);
+  ChelloCard(this.location);
 
   @override
   Widget build(BuildContext context) {
-
+    Task task = BoardView.of(context).board.getTask(location);
     return LongPressDraggable<DraggableCard>(
       childWhenDragging: new RaisedButton(),
       feedback: new Text(task.name),
-      data: DraggableCard(boardIndex, task),
+      data: DraggableCard(location.boardIndex, task),
       child: new RaisedButton(
           child: new Text(task.name),
           onPressed: _pushCardDetailView
@@ -144,7 +135,7 @@ class ChelloListTitle extends StatelessWidget {
 
   final String title;
 
-  ChelloListTitle(this.title);
+  ChelloListTitle({ Key key, this.title }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -156,58 +147,85 @@ class ChelloListTitle extends StatelessWidget {
     );
   }
 }
+
 class AddCardButton extends StatelessWidget {
+
+  final int boardIndex;
+
+  AddCardButton( { Key key, this.boardIndex }) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return new RaisedButton(
-      child: const Text('add card'),
-      onPressed: () {
-        print('add card');
-//          Future<String> future = _neverSatisfied(context);
-//          future.then((result) {
-//            print(result);
-//          });
-      },
+    return new Container(
+      height: 50.0,
+      width: 250.0,
+      margin: EdgeInsets.all(5.0),
+      child: new RaisedButton(
+        child: const Text('Add Task'),
+        onPressed: () {
+          Future<String> future = _showFormDialog(context);
+          future.then((result) {
+            BoardView.of(context).addTask(boardIndex, result);
+          });
+        },
+      ),
     );
   }
 
-  Future<String> _neverSatisfied(BuildContext context) async {
+  Future<String> _showFormDialog(BuildContext context) async {
     return showDialog<String>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
         return new AlertDialog(
           title: new Text('Add new task'),
-          content: new Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TextFormField(
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                  },
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    // Validate will return true if the form is valid, or false if
-                    // the form is invalid.
-                    if (_formKey.currentState.validate()) {
-                      Navigator.of(context).pop(_formKey);
-                    }
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            ),
-          ),
+          content: new AddCardForm(),
         );
       },
     );
   }
+}
+
+class AddCardForm extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => new _AddCardFormState();
+
+}
+
+class _AddCardFormState extends State<AddCardForm> {
+
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  String _data = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return new Form(
+      key: _formKey,
+      child: new Column(
+        children: <Widget>[
+          new TextFormField(
+            onSaved: (String value) {
+              _data = value;
+            }
+          ),
+          new Container(
+            child: new RaisedButton(
+              child: new Text('Add task'),
+              onPressed: () {
+                this.submit();
+                Navigator.of(context).pop(_data);
+              },
+            ),
+          )
+        ]
+      )
+    );
+  }
+
+  void submit() {
+    _formKey.currentState.save();
+  }
+
 }

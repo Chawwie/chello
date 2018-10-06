@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:chello/model.dart';
 import 'package:chello/list.dart';
 
+import 'package:flutter_redux/flutter_redux.dart';
+
 class BoardView extends StatefulWidget {
   BoardView({Key key, this.title}) : super(key: key);
 
@@ -60,7 +62,7 @@ class _BoardState extends State<BoardView> {
   List<Widget> _buildLists() {
     List<Widget> lists = new List<Widget>();
     for (var i = 0; i < board.size(); i++) {
-      lists.add(new ChelloList(i, board.getList(i)));
+      lists.add(new ChelloList(key: new ValueKey<int>(i), taskList: board.getList(i)));
     }
     return lists;
 
@@ -78,9 +80,9 @@ class _BoardState extends State<BoardView> {
     );
   }
 
-  void addTask(int index) {
+  void addTask(int index, String name) {
     setState(() {
-      board.getList(index).addTask(new Task('new task'));
+      board.getList(index).addTask(new Task(name));
     });
   }
 

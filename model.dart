@@ -1,4 +1,10 @@
 
+class TaskIndex {
+  final int boardIndex;
+  final int listIndex;
+
+  TaskIndex(this.boardIndex, this.listIndex);
+}
 
 class Board {
   String name;
@@ -7,6 +13,10 @@ class Board {
   Board(this.name, this.taskLists);
 
   TaskList getList(int index) => taskLists[index];
+
+  Task getTask(TaskIndex index) {
+    return getList(index.boardIndex).getTask(index.listIndex);
+  }
 
   int size() {
     return taskLists.length;
@@ -22,6 +32,10 @@ class TaskList {
   List<Task> tasks;
 
   TaskList(this.name, this.tasks);
+
+  Task getTask(int index) {
+    return tasks[index];
+  }
 
   void addTask(Task task) {
     tasks.add(task);
