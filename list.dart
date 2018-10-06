@@ -2,12 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_redux/flutter_redux.dart';
-import 'package:redux/redux.dart';
-
-import 'package:chello/actions.dart';
-import 'package:chello/reducers.dart';
-
 import 'package:chello/model.dart';
 import 'package:chello/board.dart';
 
@@ -27,7 +21,7 @@ class ChelloList extends StatelessWidget {
       child: new Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new ChelloListTitle(boardIndex: _index),
+          new ChelloListTitle(boardIndex: _index, title: taskList.name),
           new Expanded(child: new CardListView(_index, taskList)),
           new AddCardButton(boardIndex: _index),
         ],
@@ -114,7 +108,7 @@ class ChelloCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Task task = BoardView.of(context).board.getTask(location);
     return LongPressDraggable<DraggableCard>(
-      childWhenDragging: new RaisedButton(),
+      childWhenDragging: new RaisedButton(onPressed: () {}),
       feedback: new Text(task.name),
       data: DraggableCard(location.boardIndex, task),
       child: new RaisedButton(
@@ -140,31 +134,24 @@ class DraggableCard {
 class ChelloListTitle extends StatelessWidget {
 
   final int boardIndex;
+  final String title;
 
-  ChelloListTitle({ Key key, this.boardIndex}) : super(key: key);
+  ChelloListTitle({ Key key, this.boardIndex, this.title }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return new StoreConnector<Board, TaskList>(
-      converter: (store) => store.state.getList(boardIndex),
-      builder: (BuildContext context, TaskList taskList) {
-        return new Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: new TextField(
-            controller: new TextEditingController(text: taskList.name),
-            onSubmitted: (text) {
-              
-              StoreProvider.of<Board>(context).dispatch(action)
-              
-              BoardView
-                  .of(context)
-                  .board
-                  .getList(boardIndex)
-                  .name = text;
-            },
-          ),
-        );
-      },
+    return new Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: new TextField(
+        controller: new TextEditingController(text: title),
+        onSubmitted: (text) {
+          BoardView
+              .of(context)
+              .board
+              .getList(boardIndex)
+              .name = text;
+        },
+      ),
     );
   }
 }

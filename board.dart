@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:chello/model.dart';
 import 'package:chello/list.dart';
 
-import 'package:flutter_redux/flutter_redux.dart';
-
 class BoardView extends StatefulWidget {
   BoardView({Key key, this.title}) : super(key: key);
 
