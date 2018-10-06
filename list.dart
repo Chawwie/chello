@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+import 'package:chello/scoped_models.dart';
+
 import 'package:chello/model.dart';
 import 'package:chello/board.dart';
 
 
 class ChelloList extends StatelessWidget {
 
-  final TaskList taskList;
-
-  ChelloList({Key key, this.taskList}) : super(key: key);
+  ChelloList({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +19,16 @@ class ChelloList extends StatelessWidget {
       margin: EdgeInsets.all(10.0),
       width: 250.0,
       color: Colors.grey,
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new ChelloListTitle(boardIndex: _index, title: taskList.name),
-          new Expanded(child: new CardListView(_index, taskList)),
-          new AddCardButton(boardIndex: _index),
-        ],
+      child: new ScopedModel<TaskListModel>(
+        model: ScopedModel.of<BoardModel>(context).getColumn(_index),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            new ChelloListTitle(boardIndex: _index),
+            new Expanded(child: new CardListView(_index)),
+            new AddCardButton(boardIndex: _index),
+          ],
+        ),
       ),
     );
   }
@@ -35,32 +39,38 @@ class ChelloList extends StatelessWidget {
 class CardListView extends StatelessWidget {
 
   final int boardIndex;
-  final TaskList taskList;
 
-  CardListView(this.boardIndex, this.taskList);
+  CardListView(this.boardIndex);
 
   @override
   Widget build(BuildContext context) {
+    return new ScopedModelDescendant<TaskListModel>(
+      builder: (context, child, column) {
+        return new Container(
+          margin: EdgeInsets.all(10.0),
+          child: new ListView(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            children: _buildChildren(column),
+          ),
+        );
+      }
+    );
+  }
 
-    /* Interleave Chellocards with dragtargets */
+  List<Widget> _buildChildren(TaskListModel column) {
     List<Widget> children = new List<Widget>();
 
+    /* Interleave Chellocards with drag targets */
     int i = 0;
-    for (;i < taskList.tasks.length; i++) {
+    for (;i < column.length; i++) {
       TaskIndex location = new TaskIndex(boardIndex, i);
       children.add(CardListDragTarget(location));
       children.add(ChelloCard(location));
     }
     children.add(CardListDragTarget(new TaskIndex(boardIndex, i++)));
 
-    return new Container(
-      margin: EdgeInsets.all(10.0),
-      child: new ListView(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          children: children
-      ),
-    );
+    return children;
   }
 }
 
@@ -87,12 +97,14 @@ class CardListDragTarget extends StatelessWidget {
       },
       onWillAccept: (DraggableCard draggedTask) {
         /* Accept task if it came from different cardList */
-        TaskList taskList = BoardView.of(context).board.getList(location.boardIndex);
+        TaskListModel taskList = ScopedModel.of<TaskListModel>(context);
         return !taskList.contains(draggedTask.task);
       },
       onAccept: (DraggableCard draggedTask) {
-        int fromListIndex = draggedTask.fromListIndex;
-        BoardView.of(context).moveTask(draggedTask.task, fromListIndex, location.boardIndex, location.listIndex);
+        TaskListModel toColumn = ScopedModel.of<BoardModel>(context).getColumn(location.boardIndex);
+        TaskListModel fromColumn = ScopedModel.of<BoardModel>(context).getColumn(draggedTask.fromBoardIndex);
+        toColumn.insertTask(location.listIndex, draggedTask.task);
+        fromColumn.removeTask(draggedTask.task);
       },
     );
   }
@@ -106,15 +118,19 @@ class ChelloCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Task task = BoardView.of(context).board.getTask(location);
-    return LongPressDraggable<DraggableCard>(
-      childWhenDragging: new RaisedButton(onPressed: () {}),
-      feedback: new Text(task.name),
-      data: DraggableCard(location.boardIndex, task),
-      child: new RaisedButton(
-          child: new Text(task.name),
-          onPressed: _pushCardDetailView
-      ),
+    return new ScopedModelDescendant<TaskListModel>(
+        builder: (context, child, column) {
+          TaskModel task = column.getTask(location.listIndex);
+          return new LongPressDraggable(
+              child: new RaisedButton(
+                child: new Text(task.name),
+                onPressed: _pushCardDetailView,
+              ),
+            feedback: new Text(task.name),
+            childWhenDragging: new RaisedButton(onPressed: () {}),
+            data: DraggableCard(location.boardIndex, task),
+          );
+        }
     );
   }
 
@@ -124,34 +140,33 @@ class ChelloCard extends StatelessWidget {
 }
 
 class DraggableCard {
-  int fromListIndex;
-  Task task;
+  int fromBoardIndex;
+  TaskModel task;
 
-  DraggableCard(this.fromListIndex, this.task);
+  DraggableCard(this.fromBoardIndex, this.task);
 }
 
 
 class ChelloListTitle extends StatelessWidget {
 
   final int boardIndex;
-  final String title;
 
-  ChelloListTitle({ Key key, this.boardIndex, this.title }) : super(key: key);
+  ChelloListTitle({ Key key, this.boardIndex }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: new TextField(
-        controller: new TextEditingController(text: title),
-        onSubmitted: (text) {
-          BoardView
-              .of(context)
-              .board
-              .getList(boardIndex)
-              .name = text;
-        },
-      ),
+    return new ScopedModelDescendant<TaskListModel>(
+      builder: (context, child, column) {
+        return new Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: new TextField(
+            controller: new TextEditingController(text: column.name),
+            onSubmitted: (text) {
+              column.name = text;
+            },
+          ),
+        );
+      }
     );
   }
 }
@@ -160,25 +175,29 @@ class AddCardButton extends StatelessWidget {
 
   final int boardIndex;
 
-  AddCardButton( { Key key, this.boardIndex }) : super(key: key);
+  AddCardButton({ Key key, this.boardIndex }) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      height: 50.0,
-      width: 250.0,
-      margin: EdgeInsets.all(5.0),
-      child: new RaisedButton(
-        child: const Text('Add Task'),
-        onPressed: () {
-          Future<String> future = _showFormDialog(context);
-          future.then((result) {
-            BoardView.of(context).addTask(boardIndex, result);
-          });
-        },
-      ),
+    return new ScopedModelDescendant<TaskListModel>(
+      builder: (context, child, column) {
+        return new Container(
+          height: 50.0,
+          width: 250.0,
+          margin: EdgeInsets.all(5.0),
+          child: new RaisedButton(
+            child: const Text('Add Task'),
+            onPressed: () {
+              Future<String> future = _showFormDialog(context);
+              future.then((result) {
+                column.addTask(new TaskModel(result));
+              });
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -235,5 +254,4 @@ class _AddCardFormState extends State<AddCardForm> {
   void submit() {
     _formKey.currentState.save();
   }
-
 }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:chello/model.dart';
+
+import 'package:scoped_model/scoped_model.dart';
+
+import 'package:chello/scoped_models.dart';
+
 import 'package:chello/list.dart';
+
 
 class BoardView extends StatefulWidget {
   BoardView({Key key, this.title}) : super(key: key);
@@ -9,32 +14,28 @@ class BoardView extends StatefulWidget {
 
   @override
   _BoardState createState() => new _BoardState();
-
-  static _BoardState of(BuildContext context) {
-    return (context.inheritFromWidgetOfExactType(_BoardInheritedWidget) as _BoardInheritedWidget).data;
-  }
 }
 
 class _BoardState extends State<BoardView> {
 
-  Board board = new Board(
+  BoardModel boardModel = new BoardModel(
       'the Board',
-      <TaskList> [
-        new TaskList('Best List', <Task> [
-          new Task('chalk one'),
-          new Task('chalk two'),
+      <TaskListModel> [
+        new TaskListModel('Best List', <TaskModel> [
+          new TaskModel('chalk one'),
+          new TaskModel('chalk two'),
         ]),
-        new TaskList('Second Best List', <Task> [
-          new Task('prince one'),
-          new Task('prince two'),
+        new TaskListModel('Second Best List', <TaskModel> [
+          new TaskModel('prince one'),
+          new TaskModel('prince two'),
         ]),
-        new TaskList('Third Best List', <Task> [
-          new Task('bravo one'),
-          new Task('bravo two'),
+        new TaskListModel('Third Best List', <TaskModel> [
+          new TaskModel('bravo one'),
+          new TaskModel('bravo two'),
         ]),
-        new TaskList('Four Best List', <Task> [
-          new Task('alpha one'),
-          new Task('alpha two'),
+        new TaskListModel('Four Best List', <TaskModel> [
+          new TaskModel('alpha one'),
+          new TaskModel('alpha two'),
         ]),
       ]
   );
@@ -45,68 +46,32 @@ class _BoardState extends State<BoardView> {
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
-      body: Container(
-        child: _BoardInheritedWidget(
-          data: this,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: _buildLists()..add(_buildAddBoardButton()),
-          ),
+      body: new ScopedModel<BoardModel>(
+        model: boardModel,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: _buildLists(boardModel)..add(_buildAddBoardButton(boardModel)),
         ),
       ),
     );
   }
 
-  List<Widget> _buildLists() {
+  List<Widget> _buildLists(BoardModel boardModel) {
     List<Widget> lists = new List<Widget>();
-    for (var i = 0; i < board.size(); i++) {
-      lists.add(new ChelloList(key: new ValueKey<int>(i), taskList: board.getList(i)));
+    for (var i = 0; i < boardModel.size; i++) {
+      lists.add(new ChelloList(key: new ValueKey<int>(i)));
     }
     return lists;
-
-
   }
 
-  Widget _buildAddBoardButton() {
+  Widget _buildAddBoardButton(BoardModel boardModel) {
     return new RaisedButton(
         child: const Icon(Icons.add),
         onPressed: () {
           setState(() {
-            board.addList(new TaskList('new column', new List<Task>()));
+            boardModel.addColumn(new TaskListModel('new column', new List<TaskModel>()));
           });
         }
     );
-  }
-
-  void addTask(int index, String name) {
-    setState(() {
-      board.getList(index).addTask(new Task(name));
-    });
-  }
-
-  void _insertTask(Task task, int boardIndex, int listIndex) {
-    board.getList(boardIndex).tasks.insert(listIndex, task);
-  }
-
-  void _removeTask(Task task, int boardIndex) {
-    board.getList(boardIndex).tasks.remove(task);
-  }
-
-  void moveTask(Task task, int fromList, int toList, int listIndex) {
-    setState(() {
-      _removeTask(task, fromList);
-      _insertTask(task, toList, listIndex);
-    });
-  }
-}
-
-class _BoardInheritedWidget extends InheritedWidget {
-  final _BoardState data;
-
-  _BoardInheritedWidget({Key key, this.data, Widget child}) : super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(_BoardInheritedWidget old) {
-    return true;
   }
 }

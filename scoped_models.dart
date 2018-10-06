@@ -2,15 +2,20 @@ import 'package:scoped_model/scoped_model.dart';
 
 class BoardModel extends Model {
   String _name;
-  List<TaskListModel> _columns = new List<TaskListModel>();
+  List<TaskListModel> _columns;
 
-  BoardModel(this._name);
+  BoardModel(this._name, this._columns);
 
   String get name => _name;
+  int get size => _columns.length;
 
   set name(String value) {
     _name = value;
     notifyListeners();
+  }
+
+  TaskListModel getColumn(int index) {
+    return _columns[index];
   }
 
   void addColumn(TaskListModel column) {
@@ -21,9 +26,21 @@ class BoardModel extends Model {
 
 class TaskListModel extends Model {
   String _name;
-  List<TaskModel> _tasks = new List<TaskModel>();
+  List<TaskModel> _tasks;
 
-  TaskListModel(this._name);
+  TaskListModel(this._name, this._tasks);
+
+  get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  get length => _tasks.length;
+
+  TaskModel getTask(int index) {
+    return _tasks[index];
+  }
 
   void addTask(TaskModel task) {
     _tasks.add(task);
@@ -35,9 +52,18 @@ class TaskListModel extends Model {
     notifyListeners();
   }
 
-  void removeTask(int index) {
+  void removeTaskAt(int index) {
     _tasks.removeAt(index);
     notifyListeners();
+  }
+
+  void removeTask(TaskModel task) {
+    _tasks.remove(task);
+    notifyListeners();
+  }
+
+  bool contains(TaskModel task) {
+    return _tasks.contains(task);
   }
 }
 
