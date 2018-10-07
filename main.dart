@@ -1,12 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:chello/widgets/board_widget.dart';
 
-import 'package:chello/board.dart';
-import 'package:chello/model.dart';
-
-Board boardReducer(Board state, dynamic action) {
-  return state;
-}
 
 void main() {
   runApp(new ChelloApp(title: 'Chello'));
@@ -28,7 +23,7 @@ class ChelloApp extends StatelessWidget {
         primaryColor: Colors.lightBlue[800],
         accentColor: Colors.cyan[600],
       ),
-      home: new BoardView(title: title),
+      home: new BoardWidget(title: title),
     );
   }
 }

@@ -1,57 +1,110 @@
+import 'package:scoped_model/scoped_model.dart';
+
+class BoardModel extends Model {
+  String _name;
+  List<TaskListModel> _columns;
+
+  BoardModel(this._name, this._columns);
+
+  BoardModel.example() {
+    this._name = 'the Board';
+    this._columns = <TaskListModel> [
+      new TaskListModel('Best List', <TaskModel> [
+        new TaskModel('chalk one'),
+        new TaskModel('chalk two'),
+      ]),
+      new TaskListModel('Second Best List', <TaskModel> [
+        new TaskModel('prince one'),
+        new TaskModel('prince two'),
+      ]),
+      new TaskListModel('Third Best List', <TaskModel> [
+        new TaskModel('bravo one'),
+        new TaskModel('bravo two'),
+      ]),
+      new TaskListModel('Four Best List', <TaskModel> [
+        new TaskModel('alpha one'),
+        new TaskModel('alpha two'),
+      ]),
+    ];
+  }
+
+  String get name => _name;
+  int get size => _columns.length;
+
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  TaskListModel getColumn(int index) {
+    return _columns[index];
+  }
+
+  void addColumn(TaskListModel column) {
+    _columns.add(column);
+    notifyListeners();
+  }
+}
+
+class TaskListModel extends Model {
+  String _name;
+  List<TaskModel> _tasks;
+
+  TaskListModel(this._name, this._tasks);
+
+  get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  get length => _tasks.length;
+
+  TaskModel getTask(int index) {
+    return _tasks[index];
+  }
+
+  void addTask(TaskModel task) {
+    _tasks.add(task);
+    notifyListeners();
+  }
+
+  void insertTask(int index, TaskModel task) {
+    _tasks.insert(index, task);
+    notifyListeners();
+  }
+
+  void removeTaskAt(int index) {
+    _tasks.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeTask(TaskModel task) {
+    _tasks.remove(task);
+    notifyListeners();
+  }
+
+  bool contains(TaskModel task) {
+    return _tasks.contains(task);
+  }
+}
+
+class TaskModel extends Model {
+  String _name;
+
+  TaskModel(this._name);
+
+  String get name => _name;
+
+  set name(String value) {
+    _name =  value;
+    notifyListeners();
+  }
+}
 
 class TaskIndex {
   final int boardIndex;
   final int listIndex;
 
   TaskIndex(this.boardIndex, this.listIndex);
-}
-
-class Board {
-  String name;
-  List<TaskList> taskLists;
-
-  Board(this.name, this.taskLists);
-
-  TaskList getList(int index) => taskLists[index];
-
-  Task getTask(TaskIndex index) {
-    return getList(index.boardIndex).getTask(index.listIndex);
-  }
-
-  int size() {
-    return taskLists.length;
-  }
-
-  void addList(TaskList taskList) {
-    taskLists.add(taskList);
-  }
-}
-
-class TaskList {
-  String name;
-  List<Task> tasks;
-
-  TaskList(this.name, this.tasks);
-
-  Task getTask(int index) {
-    return tasks[index];
-  }
-
-  void addTask(Task task) {
-    tasks.add(task);
-  }
-
-  bool contains(Task task) {
-    return tasks.contains(task);
-  }
-
-  int length() {
-    return tasks.length;
-  }
-}
-
-class Task {
-  String name;
-
-  Task(this.name);
 }
