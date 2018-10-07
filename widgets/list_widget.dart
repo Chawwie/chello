@@ -9,7 +9,9 @@ import 'package:chello/widgets/add_card_widget.dart';
 
 class ChelloList extends StatelessWidget {
 
-  ChelloList({Key key}) : super(key: key);
+  ChelloList({ Key key }) : super(key: key);
+
+  int get _index => (key as ValueKey<int>).value;
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +25,13 @@ class ChelloList extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             new ChelloListTitle(boardIndex: _index),
-            new Expanded(child: new CardListView(_index)),
+            new Expanded(child: new CardListView(boardIndex: _index)),
             new AddCardButton(boardIndex: _index),
           ],
         ),
       ),
     );
   }
-
-  int get _index => (key as ValueKey<int>).value;
 }
 
 class ChelloListTitle extends StatelessWidget {
@@ -62,7 +62,7 @@ class CardListView extends StatelessWidget {
 
   final int boardIndex;
 
-  CardListView(this.boardIndex);
+  CardListView({ Key key, this.boardIndex });
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +87,12 @@ class CardListView extends StatelessWidget {
     int i = 0;
     for (;i < column.length; i++) {
       TaskIndex location = new TaskIndex(boardIndex, i);
-      children.add(CardListDragTarget(location));
-      children.add(ChelloCard(location));
+      children.add(CardListDragTarget(location: location));
+      children.add(ChelloCard(location: location));
     }
-    children.add(CardListDragTarget(new TaskIndex(boardIndex, i++)));
+    children.add(CardListDragTarget(
+        location: new TaskIndex(boardIndex, i++)
+    ));
 
     return children;
   }

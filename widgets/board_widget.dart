@@ -7,7 +7,7 @@ import 'package:chello/widgets/list_widget.dart';
 
 
 class BoardWidget extends StatefulWidget {
-  BoardWidget({Key key, this.title}) : super(key: key);
+  BoardWidget({ Key key, this.title }) : super(key: key);
 
   final String title;
 
@@ -17,10 +17,12 @@ class BoardWidget extends StatefulWidget {
 
 class _BoardWidgetState extends State<BoardWidget> {
 
+  BoardModel _board = new BoardModel.example();
+
   @override
   Widget build(BuildContext context) {
     return new ScopedModel<BoardModel>(
-      model: BoardModel.example(),
+      model: _board,
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text(widget.title),

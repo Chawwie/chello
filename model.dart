@@ -91,13 +91,20 @@ class TaskListModel extends Model {
 
 class TaskModel extends Model {
   String _name;
+  String _description = '';
 
   TaskModel(this._name);
 
   String get name => _name;
+  String get description => _description;
 
   set name(String value) {
     _name =  value;
+    notifyListeners();
+  }
+
+  set description(String value) {
+    _description = value;
     notifyListeners();
   }
 }

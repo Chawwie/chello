@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:scoped_model/scoped_model.dart';
+
 import 'package:chello/model.dart';
+import 'package:chello/task_page.dart';
 
 class ChelloCard extends StatelessWidget {
 
   final TaskIndex location;
 
-  ChelloCard(this.location);
+  ChelloCard({ Key key, this.location });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,9 @@ class ChelloCard extends StatelessWidget {
           return new LongPressDraggable(
             child: new RaisedButton(
               child: new Text(task.name),
-              onPressed: _pushCardDetailView,
+              onPressed: () {
+                _pushCardDetailView(context, task);
+              },
             ),
             feedback: new Text(task.name),
             childWhenDragging: new RaisedButton(onPressed: () {}),
@@ -27,8 +31,12 @@ class ChelloCard extends StatelessWidget {
     );
   }
 
-  void _pushCardDetailView() {
-    print('tapped card');
+  void _pushCardDetailView(BuildContext context, TaskModel task) {
+    Navigator.of(context).push(new MaterialPageRoute(
+        builder: (BuildContext context) {
+          return new TaskPage(task: task);
+        }
+    ));
   }
 }
 
@@ -36,7 +44,7 @@ class CardListDragTarget extends StatelessWidget {
 
   final TaskIndex location;
 
-  CardListDragTarget(this.location);
+  CardListDragTarget({ Key key, this.location });
 
   @override
   Widget build(BuildContext context) {

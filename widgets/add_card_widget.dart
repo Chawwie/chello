@@ -23,8 +23,7 @@ class AddCardButton extends StatelessWidget {
           child: new RaisedButton(
             child: const Text('Add Task'),
             onPressed: () {
-              Future<String> future = _showFormDialog(context);
-              future.then((result) {
+              _showFormDialog(context).then((result) {
                 column.addTask(new TaskModel(result));
               });
             },
@@ -51,7 +50,6 @@ class AddCardButton extends StatelessWidget {
 class _AddCardForm extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _AddCardFormState();
-
 }
 
 class _AddCardFormState extends State<_AddCardForm> {
@@ -62,25 +60,25 @@ class _AddCardFormState extends State<_AddCardForm> {
   @override
   Widget build(BuildContext context) {
     return new Form(
-        key: _formKey,
-        child: new Column(
-            children: <Widget>[
-              new TextFormField(
-                  onSaved: (String value) {
-                    _data = value;
-                  }
-              ),
-              new Container(
-                child: new RaisedButton(
-                  child: new Text('Add task'),
-                  onPressed: () {
-                    this.submit();
-                    Navigator.of(context).pop(_data);
-                  },
-                ),
-              )
-            ]
-        )
+      key: _formKey,
+      child: new Column(
+        children: <Widget>[
+          new TextFormField(
+            onSaved: (String value) {
+              _data = value;
+            }
+          ),
+          new Container(
+            child: new RaisedButton(
+              child: new Text('Add task'),
+              onPressed: () {
+                this.submit();
+                Navigator.of(context).pop(_data);
+              },
+            ),
+          )
+        ]
+      ),
     );
   }
 
