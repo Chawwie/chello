@@ -17,8 +17,8 @@ class ChelloList extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Card(
       color: Colors.black12,
+      margin: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
       child: new Container(
-        margin: EdgeInsets.all(10.0),
         width: 250.0,
         child: new ScopedModel<TaskListModel>(
           model: ScopedModel.of<BoardModel>(context).getColumn(_index),
@@ -46,13 +46,24 @@ class ChelloListTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return new ScopedModelDescendant<TaskListModel>(
         builder: (context, child, column) {
-          return new Padding(
-            padding: const EdgeInsets.all(8.0),
+          return new Container(
+            padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+            decoration: new BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+              boxShadow: <BoxShadow>[
+                const BoxShadow(offset: Offset(0.0, 2.5), spreadRadius: -1.5, blurRadius: 2.5),
+              ],
+            ),
             child: new TextField(
+              decoration: new InputDecoration(
+                enabledBorder: InputBorder.none,
+              ),
               controller: new TextEditingController(text: column.name),
               onSubmitted: (text) {
                 column.name = text;
               },
+              onEditingComplete: () {},
             ),
           );
         }

@@ -37,6 +37,7 @@ class ChelloCard extends StatelessWidget {
     return new SizedBox(
       width: 250.0,
       child: new RaisedButton(
+        color: Colors.grey[100],
         child: new Text(name),
         onPressed: onPressed,
       ),
