@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:scoped_model/scoped_model.dart';
@@ -17,17 +19,27 @@ class ChelloCard extends StatelessWidget {
         builder: (context, child, column) {
           TaskModel task = column.getTask(location.listIndex);
           return new LongPressDraggable(
-            child: new RaisedButton(
-              child: new Text(task.name),
-              onPressed: () {
-                _pushCardDetailView(context, task);
-              },
+            child: _buildSizedNamedButton(task.name, () {
+              _pushCardDetailView(context, task);
+            }),
+            feedback: new Transform.rotate(
+              angle: 0.0872665,     // 5 degrees to radians
+              child: _buildSizedNamedButton(task.name, (){}),
             ),
-            feedback: new Text(task.name),
-            childWhenDragging: new RaisedButton(onPressed: () {}),
+            childWhenDragging: _buildSizedNamedButton('', null),
             data: DraggableCard(location.boardIndex, task),
           );
         }
+    );
+  }
+
+  Widget _buildSizedNamedButton(String name, void onPressed()) {
+    return new SizedBox(
+      width: 250.0,
+      child: new RaisedButton(
+        child: new Text(name),
+        onPressed: onPressed,
+      ),
     );
   }
 
