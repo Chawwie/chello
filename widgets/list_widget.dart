@@ -15,19 +15,21 @@ class ChelloList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      margin: EdgeInsets.all(10.0),
-      width: 250.0,
-      color: Colors.grey,
-      child: new ScopedModel<TaskListModel>(
-        model: ScopedModel.of<BoardModel>(context).getColumn(_index),
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new ChelloListTitle(boardIndex: _index),
-            new Expanded(child: new CardListView(boardIndex: _index)),
-            new AddCardButton(boardIndex: _index),
-          ],
+    return new Card(
+      color: Colors.black12,
+      child: new Container(
+        margin: EdgeInsets.all(10.0),
+        width: 250.0,
+        child: new ScopedModel<TaskListModel>(
+          model: ScopedModel.of<BoardModel>(context).getColumn(_index),
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new ChelloListTitle(boardIndex: _index),
+              new Expanded(child: new CardListView(boardIndex: _index)),
+              new AddCardButton(boardIndex: _index),
+            ],
+          ),
         ),
       ),
     );

@@ -9,21 +9,24 @@ class BoardModel extends Model {
   BoardModel.example() {
     this._name = 'the Board';
     this._columns = <TaskListModel> [
-      new TaskListModel('Best List', <TaskModel> [
-        new TaskModel('chalk one'),
-        new TaskModel('chalk two'),
+      new TaskListModel('To Do', <TaskModel> [
+        new TaskModel('Security audit')
       ]),
-      new TaskListModel('Second Best List', <TaskModel> [
-        new TaskModel('prince one'),
-        new TaskModel('prince two'),
+      new TaskListModel('Doing', <TaskModel> [
+        new TaskModel('Edits and update for the current version'),
+        new TaskModel('Broken links'),
+        new TaskModel('Landing page sticky header bug'),
+        new TaskModel('Content kits prortotype content'),
+        new TaskModel('Apps quickstart'),
+        new TaskModel('Inheritance diagrams'),
       ]),
-      new TaskListModel('Third Best List', <TaskModel> [
-        new TaskModel('bravo one'),
-        new TaskModel('bravo two'),
+      new TaskListModel('Testing', <TaskModel> [
+        new TaskModel('Text edits on landing'),
+        new TaskModel('Change font size by user'),
       ]),
-      new TaskListModel('Four Best List', <TaskModel> [
-        new TaskModel('alpha one'),
-        new TaskModel('alpha two'),
+      new TaskListModel('Done', <TaskModel> [
+        new TaskModel('System icons'),
+        new TaskModel('Home page animation'),
       ]),
     ];
   }
