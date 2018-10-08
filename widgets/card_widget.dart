@@ -38,7 +38,14 @@ class ChelloCard extends StatelessWidget {
       width: 230.0,
       child: new RaisedButton(
         color: Colors.grey[100],
-        child: new Text(name),
+        child: new Align(
+          alignment: Alignment.centerLeft,
+          child: new Text(
+            name,
+            textAlign: TextAlign.left,
+            style: new TextStyle(fontWeight: FontWeight.normal),
+          )
+        ),
         onPressed: onPressed,
       ),
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:scoped_model/scoped_model.dart';
 
+import 'package:flutter_parallax/flutter_parallax.dart';
+
 import 'package:chello/model.dart';
 import 'package:chello/widgets/list_widget.dart';
 
@@ -30,6 +32,27 @@ class _BoardWidgetState extends State<BoardWidget> {
         ),
         body: new ScopedModelDescendant<BoardModel>(
           builder: (context, child, board) {
+            return new Stack(
+              children: <Widget>[
+                new Parallax.outside(
+                  child: Image.asset(
+                    "images/green_splash.jpg",
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topLeft,
+                  ),
+                  controller: _controller,
+                  flipDirection: false,
+                  direction: AxisDirection.right,
+                ),
+                new ListView(
+                  padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                  controller: _controller,
+                  scrollDirection: Axis.horizontal,
+                  children: _buildLists(board)..add(_buildAddBoardButton(board)),
+                )
+              ],
+            );
+
             return new Container(
               decoration: new BoxDecoration(
                 image: new DecorationImage(
@@ -38,7 +61,7 @@ class _BoardWidgetState extends State<BoardWidget> {
                 ),
               ),
               child: new ListView(
-                padding: EdgeInsets.all(20.0),
+                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 controller: _controller,
                 scrollDirection: Axis.horizontal,
                 children: _buildLists(board)..add(_buildAddBoardButton(board)),
