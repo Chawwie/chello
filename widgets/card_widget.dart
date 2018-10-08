@@ -27,7 +27,7 @@ class ChelloCard extends StatelessWidget {
               child: _buildSizedNamedButton(task.name, (){}),
             ),
             childWhenDragging: _buildSizedNamedButton('', null),
-            data: DraggableCard(location.boardIndex, task),
+            data: DraggableCard(location, task),
           );
         }
     );
@@ -35,7 +35,7 @@ class ChelloCard extends StatelessWidget {
 
   Widget _buildSizedNamedButton(String name, void onPressed()) {
     return new SizedBox(
-      width: 250.0,
+      width: 230.0,
       child: new RaisedButton(
         color: Colors.grey[100],
         child: new Text(name),
@@ -75,24 +75,36 @@ class CardListDragTarget extends StatelessWidget {
         }
       },
       onWillAccept: (DraggableCard draggedTask) {
-        /* Accept task if it came from different cardList */
-        TaskListModel taskList = ScopedModel.of<TaskListModel>(context);
-        return !taskList.contains(draggedTask.task);
+        /* Accept dragged task if it came from different taskList or they're on the same taskList but aren't adjacent to each other*/
+        return draggedTask.fromLocation.boardIndex != location.boardIndex ||
+            (draggedTask.fromLocation.listIndex != location.listIndex &&
+                draggedTask.fromLocation.listIndex+1 != location.listIndex);
       },
       onAccept: (DraggableCard draggedTask) {
         TaskListModel toColumn = ScopedModel.of<BoardModel>(context).getColumn(location.boardIndex);
-        TaskListModel fromColumn = ScopedModel.of<BoardModel>(context).getColumn(draggedTask.fromBoardIndex);
-        toColumn.insertTask(location.listIndex, draggedTask.task);
-        fromColumn.removeTask(draggedTask.task);
+
+        if (location.boardIndex == draggedTask.fromLocation.boardIndex) {
+          toColumn.insertTask(location.listIndex, draggedTask.task);
+          if (location.listIndex < draggedTask.fromLocation.boardIndex) {
+            toColumn.removeTaskAt(draggedTask.fromLocation.listIndex + 1);
+          } else {
+            toColumn.removeTaskAt(draggedTask.fromLocation.listIndex);
+          }
+        } else {
+          TaskListModel fromColumn = ScopedModel.of<BoardModel>(context).getColumn(draggedTask.fromLocation.boardIndex);
+          toColumn.insertTask(location.listIndex, draggedTask.task);
+          fromColumn.removeTaskAt(draggedTask.fromLocation.listIndex);
+        }
+
       },
     );
   }
 }
 
 class DraggableCard {
-  int fromBoardIndex;
+  TaskIndex fromLocation;
   TaskModel task;
 
-  DraggableCard(this.fromBoardIndex, this.task);
+  DraggableCard(this.fromLocation, this.task);
 }
 

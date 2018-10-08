@@ -16,7 +16,7 @@ class BoardModel extends Model {
         new TaskModel('Edits and update for the current version'),
         new TaskModel('Broken links'),
         new TaskModel('Landing page sticky header bug'),
-        new TaskModel('Content kits prortotype content'),
+        new TaskModel('Content kits prototype content'),
         new TaskModel('Apps quickstart'),
         new TaskModel('Inheritance diagrams'),
       ]),
@@ -117,4 +117,9 @@ class TaskIndex {
   final int listIndex;
 
   TaskIndex(this.boardIndex, this.listIndex);
+
+  @override
+  bool operator ==(other) {
+    return this.boardIndex == other.boardIndex && this.listIndex == other.listIndex;
+  }
 }
