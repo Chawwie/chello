@@ -52,8 +52,12 @@ class _TaskPageState extends State<TaskPage> {
               delegate: new SliverChildListDelegate(
                 <Widget> [
                   new TextField(
-                    controller: new TextEditingController(text: task.description),
-                    decoration: new InputDecoration(hintText: 'Edit card description...'),
+                    controller: new TextEditingController(
+                      text:  task.description
+                    ),
+                    decoration: new InputDecoration(
+                      hintText: 'Edit card description...'
+                    ),
                     onSubmitted: (text) {
                       task.description = text;
                     },

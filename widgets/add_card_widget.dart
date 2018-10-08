@@ -24,7 +24,9 @@ class AddCardButton extends StatelessWidget {
             child: const Text('Add Task'),
             onPressed: () {
               _showFormDialog(context).then((result) {
-                column.addTask(new TaskModel(result));
+                if (result != null) {
+                  column.addTask(new TaskModel(result));
+                }
               });
             },
           ),
@@ -38,9 +40,11 @@ class AddCardButton extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return new AlertDialog(
+        return new SimpleDialog(
           title: new Text('Add new task'),
-          content: new _AddCardForm(),
+          children: <Widget>[
+            new _AddCardForm()
+          ],
         );
       },
     );
